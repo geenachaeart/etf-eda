@@ -172,8 +172,18 @@ svg { display: block; fill: currentColor; }
 .source-card a:hover { text-decoration: underline; }
 
 .main-content { min-width: 0; padding: 34px clamp(24px, 4vw, 58px) 60px; }
-.page { display: none; max-width: 1440px; margin: 0 auto; animation: page-in .28s ease; }
-.page.is-active { display: block; }
+.page {
+  display: block;
+  max-width: 1440px;
+  margin: 0 auto;
+  scroll-margin-top: 106px;
+  animation: page-in .28s ease;
+}
+.page + .page {
+  margin-top: 64px;
+  padding-top: 58px;
+  border-top: 1px solid var(--line);
+}
 .page-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 27px; }
 .eyebrow, .panel-kicker { margin: 0 0 5px; color: var(--green-dark); font-size: 10px; font-weight: 900; letter-spacing: .14em; }
 .page-heading h1 { margin: 0; font-size: clamp(25px, 3vw, 34px); line-height: 1.22; letter-spacing: -.045em; }
@@ -402,6 +412,8 @@ tbody tr:last-child td { border-bottom: 0; }
   .nav-item svg { width: 18px; }
   .source-card { display: none; }
   .main-content { padding: 24px 16px 92px; }
+  .page { scroll-margin-top: 82px; }
+  .page + .page { margin-top: 44px; padding-top: 39px; }
   .loading-overlay { inset: 66px 0 66px; }
   .overview-grid { display: block; }
   .overview-grid > .panel { margin-bottom: 14px; }

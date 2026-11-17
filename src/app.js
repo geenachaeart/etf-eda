@@ -458,10 +458,23 @@ function showProduct(itemCode) {
 
 function switchPage(page, { focusHeading = false } = {}) {
   $$(".nav-item").forEach((button) => button.classList.toggle("is-active", button.dataset.page === page));
-  $$("[data-page-panel]").forEach((panel) => panel.classList.toggle("is-active", panel.dataset.pagePanel === page));
+  const panel = $(`[data-page-panel="${page}"]`);
+  if (!panel) return;
   history.replaceState(null, "", `#${page}`);
-  window.scrollTo({ top: 0, behavior: "smooth" });
-  if (focusHeading) $(`[data-page-panel="${page}"] h1`)?.focus?.();
+  panel.scrollIntoView({ behavior: "smooth", block: "start" });
+  if (focusHeading) panel.querySelector("h1")?.focus?.();
+}
+
+function observeSections() {
+  const observer = new IntersectionObserver((entries) => {
+    const visible = entries
+      .filter((entry) => entry.isIntersecting)
+      .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+    if (!visible) return;
+    const page = visible.target.dataset.pagePanel;
+    $$(".nav-item").forEach((button) => button.classList.toggle("is-active", button.dataset.page === page));
+  }, { rootMargin: "-18% 0px -62%", threshold: [0, 0.1, 0.35] });
+  $$("[data-page-panel]").forEach((section) => observer.observe(section));
 }
 
 function syncFilters() {
@@ -544,6 +557,9 @@ function bindEvents() {
 
 bindEvents();
 configureAutoRefresh();
+observeSections();
 const initialPage = location.hash.slice(1);
-if (["overview", "issuers", "markets", "products"].includes(initialPage)) switchPage(initialPage);
+if (["overview", "issuers", "markets", "products"].includes(initialPage)) {
+  requestAnimationFrame(() => switchPage(initialPage));
+}
 loadData();
