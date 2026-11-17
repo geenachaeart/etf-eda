@@ -21,6 +21,16 @@ node server.mjs
 
 브라우저에서 `http://127.0.0.1:4173`을 엽니다. 네이버 금융 API가 EUC-KR로 응답하고 브라우저의 교차 출처 호출을 허용하지 않으므로, 로컬 서버와 배포 Worker가 `/api/etfs` 프록시를 제공합니다.
 
+## GitHub Pages
+
+GitHub Pages용 정적 파일은 `docs/`에 생성합니다.
+
+```bash
+node scripts/build-pages.mjs
+```
+
+Pages 화면은 공개 프록시를 통해 실시간 ETF 데이터를 조회합니다.
+
 ## 검사와 빌드
 
 ```bash

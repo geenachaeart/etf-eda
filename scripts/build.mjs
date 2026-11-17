@@ -25,14 +25,30 @@ const securityHeaders = {
   "Referrer-Policy": "strict-origin-when-cross-origin",
 };
 
-function jsonResponse(data, status = 200) {
+function jsonResponse(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "Content-Type": "application/json; charset=utf-8", ...securityHeaders },
+    headers: { "Content-Type": "application/json; charset=utf-8", ...securityHeaders, ...extraHeaders },
   });
 }
 
-async function proxyEtfs() {
+function apiCorsHeaders(request) {
+  const origin = request.headers.get("Origin");
+  const allowedOrigins = new Set([
+    "https://geenachaeart.github.io",
+    "http://127.0.0.1:4175",
+    "http://localhost:4175",
+  ]);
+  return {
+    "Access-Control-Allow-Origin": allowedOrigins.has(origin) ? origin : "https://geenachaeart.github.io",
+    "Access-Control-Allow-Methods": "GET, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Max-Age": "86400",
+  };
+}
+
+async function proxyEtfs(request) {
+  const corsHeaders = apiCorsHeaders(request);
   try {
     const upstream = await fetch("https://finance.naver.com/api/sise/etfItemList.nhn", {
       headers: {
@@ -44,17 +60,18 @@ async function proxyEtfs() {
     });
 
     if (!upstream.ok) {
-      return jsonResponse({ error: "upstream_error", status: upstream.status }, 502);
+      return jsonResponse({ error: "upstream_error", status: upstream.status }, 502, corsHeaders);
     }
 
     const headers = new Headers({
       "Content-Type": "text/plain; charset=euc-kr",
       "Cache-Control": "public, max-age=15, stale-while-revalidate=30",
       ...securityHeaders,
+      ...corsHeaders,
     });
     return new Response(upstream.body, { status: 200, headers });
   } catch (error) {
-    return jsonResponse({ error: "network_error", message: String(error?.message || error) }, 502);
+    return jsonResponse({ error: "network_error", message: String(error?.message || error) }, 502, corsHeaders);
   }
 }
 
@@ -63,8 +80,9 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === "/api/etfs") {
+      if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: apiCorsHeaders(request) });
       if (request.method !== "GET") return new Response("Method Not Allowed", { status: 405 });
-      return proxyEtfs();
+      return proxyEtfs(request);
     }
 
     const asset = assets.get(url.pathname);

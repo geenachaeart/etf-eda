@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 
 const root = dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.PORT || 4173);
+const staticRoot = resolve(root, process.env.STATIC_DIR || "src");
 const types = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
@@ -37,8 +38,8 @@ const server = createServer(async (req, res) => {
   }
 
   const relative = url.pathname === "/" ? "index.html" : url.pathname.slice(1);
-  const file = resolve(root, "src", relative);
-  if (!file.startsWith(resolve(root, "src"))) {
+  const file = resolve(staticRoot, relative);
+  if (!file.startsWith(staticRoot)) {
     res.writeHead(403).end("Forbidden");
     return;
   }

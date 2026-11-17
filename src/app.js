@@ -1,4 +1,7 @@
-const API_PATH = "/api/etfs";
+const PUBLIC_API_PROXY = "https://naver-etf-lab-20261117.todaycode-8480.chatgpt.site/api/etfs";
+const API_PATH = location.hostname.endsWith("github.io") || new URLSearchParams(location.search).has("pages-preview")
+  ? PUBLIC_API_PROXY
+  : "/api/etfs";
 const AUTO_REFRESH_MS = 60_000;
 const PAGE_SIZE = 20;
 
